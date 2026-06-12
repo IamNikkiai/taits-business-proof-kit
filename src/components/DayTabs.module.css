@@ -1,0 +1,44 @@
+.tabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 1px solid #E8E4DC;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 13px 15px 11px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #444;
+  transition: all .15s;
+}
+
+.tab:hover:not(.locked) {
+  background: #F5F3EF;
+}
+
+.tab.active {
+  background: #B8952A;
+  color: #000;
+  border-bottom-color: #B8952A;
+  font-weight: 700;
+}
+
+.tab.done {
+  color: #999;
+}
+
+.tab.locked {
+  color: #ccc;
+  cursor: not-allowed;
+}

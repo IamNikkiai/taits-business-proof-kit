@@ -1,0 +1,210 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: #A0303F;
+  text-transform: uppercase;
+  border-bottom: 1px solid #A0303F;
+  padding-bottom: 4px;
+  margin-top: 4px;
+}
+
+.body {
+  font-size: 14px;
+  color: #1a1a1a;
+  line-height: 1.7;
+}
+
+.hint {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Checklist */
+.checkList {
+  background: #fff;
+  border: 1px solid #E8E4DC;
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.checkItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.checkBox {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 4px;
+  border: 2px solid #E8E4DC;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+
+.checkBoxChecked {
+  composes: checkBox;
+  border-color: #B8952A;
+  background: #B8952A;
+}
+
+.checkText {
+  font-size: 13px;
+  color: #1a1a1a;
+  line-height: 1.5;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.checkTextDone {
+  composes: checkText;
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+/* Questions */
+.questions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.questionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.qLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #A0303F;
+}
+
+.qInput {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #1a1a1a;
+  background: #fff;
+  border: 1px solid #E8E4DC;
+  border-radius: 6px;
+  padding: 7px 10px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.5;
+}
+
+.qInput:focus {
+  border-color: #B8952A;
+}
+
+.fallback {
+  background: #F5F3EF;
+  border: 1px solid #E8E4DC;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* Code blocks */
+.codeBlock {
+  background: #F5F3EF;
+  border: 1px solid #E8E4DC;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  color: #1a1a1a;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Pricing */
+.pricingTable {
+  background: #fff;
+  border: 1px solid #E8E4DC;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.priceRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid #E8E4DC;
+}
+
+.priceRange {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #B8952A;
+  min-width: 62px;
+  padding-top: 1px;
+}
+
+.priceCond {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.priceNote {
+  padding: 10px 14px;
+  background: #000;
+  font-size: 12px;
+  color: #B8952A;
+  font-style: italic;
+}
+
+/* Sentence */
+.sentenceWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sentenceInput {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #fff;
+  border: 2px solid #B8952A;
+  border-radius: 8px;
+  padding: 11px 13px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+}
+
+.sentenceHint {
+  font-size: 11px;
+  color: #999;
+  font-style: italic;
+}
