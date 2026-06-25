@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PromptBlock from './PromptBlock';
 import ResultBlock from './ResultBlock';
 import styles from './DayContent.module.css';
@@ -28,14 +28,8 @@ function CheckItem({ label, checked, onChange }) {
 }
 
 // Day 1 — checklist + prompt
-function Day1Content({ day }) {
-  const [checks, setChecks] = useState(Array(day.checklist.length).fill(false));
-
-  const toggle = (i) => {
-    const next = [...checks];
-    next[i] = !next[i];
-    setChecks(next);
-  };
+function Day1Content({ day, checklistItems, onChecklistChange }) {
+  const checks = checklistItems || Array(day.checklist.length).fill(false);
 
   return (
     <>
@@ -44,7 +38,12 @@ function Day1Content({ day }) {
       <SectionLabel>CHECKLIST</SectionLabel>
       <div className={styles.checkList}>
         {day.checklist.map((item, i) => (
-          <CheckItem key={i} label={item} checked={checks[i]} onChange={() => toggle(i)} />
+          <CheckItem
+            key={i}
+            label={item}
+            checked={!!checks[i]}
+            onChange={() => onChecklistChange(i, !checks[i])}
+          />
         ))}
       </div>
       <SectionLabel>AI PROMPT</SectionLabel>
@@ -165,11 +164,11 @@ function Day5Content({ day, sentence, onSentenceChange }) {
   );
 }
 
-export default function DayContent({ day, sentence, onSentenceChange }) {
+export default function DayContent({ day, sentence, onSentenceChange, checklistItems, onChecklistChange }) {
   const n = day.number;
   return (
     <div className={styles.wrap}>
-      {n === 1 && <Day1Content day={day} />}
+      {n === 1 && <Day1Content day={day} checklistItems={checklistItems} onChecklistChange={onChecklistChange} />}
       {n === 2 && <Day2Content day={day} />}
       {n === 3 && <Day3Content day={day} />}
       {n === 4 && <Day4Content day={day} />}

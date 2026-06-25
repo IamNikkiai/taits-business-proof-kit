@@ -22,6 +22,8 @@ export default function App() {
     loading,
     error,
     saving,
+    checklistState,
+    setChecklistItem,
     isDayComplete,
     isDayUnlocked,
     completeDay,
@@ -86,6 +88,8 @@ export default function App() {
             day={day}
             sentence={sentence}
             onSentenceChange={handleSentenceChange}
+            checklistItems={checklistState[`day-${day.number}`]}
+            onChecklistChange={(index, value) => setChecklistItem(`day-${day.number}`, index, value)}
           />
 
           {/* Mark done row */}

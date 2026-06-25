@@ -2,6 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 
 const SCRIPT_URL = process.env.REACT_APP_SCRIPT_URL;
 
+// Default checklist state: day-1 has 5 items (the only day with a checklist)
+const DEFAULT_CHECKLIST = {
+  'day-1': [false, false, false, false, false],
+};
+
 const DEFAULT_PROGRESS = {
   'day-1': 'no',
   'day-2': 'no',
@@ -13,6 +18,7 @@ const DEFAULT_PROGRESS = {
 
 export function useProgress(email) {
   const [progress, setProgress] = useState(DEFAULT_PROGRESS);
+  const [checklistState, setChecklistState] = useState(DEFAULT_CHECKLIST);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -39,6 +45,16 @@ export function useProgress(email) {
             'day-5': data['day-5'] || 'no',
             sentence: data.sentence || '',
           });
+
+          // Parse saved checklist state
+          if (data['checklist-state']) {
+            try {
+              const parsed = JSON.parse(data['checklist-state']);
+              setChecklistState({ ...DEFAULT_CHECKLIST, ...parsed });
+            } catch (_) {
+              // Malformed JSON — fall back to defaults
+            }
+          }
         }
       } catch (err) {
         setError('Could not load your progress. Your work will still save when you complete each day.');
@@ -50,7 +66,7 @@ export function useProgress(email) {
     loadProgress();
   }, [email]);
 
-  // Save a single field update
+  // Save a single progress field update (day completion, sentence)
   const saveField = useCallback(async (field, value) => {
     if (!email || !SCRIPT_URL) return;
 
@@ -63,14 +79,37 @@ export function useProgress(email) {
         action: 'save',
         email,
         ...updated,
+        'checklist-state': JSON.stringify(checklistState),
       });
       await fetch(`${SCRIPT_URL}?${params.toString()}`);
-    } catch (err) {
+    } catch (_) {
       // Silent fail — state is still updated locally
     } finally {
       setSaving(false);
     }
-  }, [email, progress]);
+  }, [email, progress, checklistState]);
+
+  // Toggle a single checklist item and persist immediately
+  const setChecklistItem = useCallback(async (dayKey, index, value) => {
+    if (!email || !SCRIPT_URL) return;
+
+    const dayItems = checklistState[dayKey] ? [...checklistState[dayKey]] : [];
+    dayItems[index] = value;
+    const updated = { ...checklistState, [dayKey]: dayItems };
+    setChecklistState(updated);
+
+    try {
+      const params = new URLSearchParams({
+        action: 'save',
+        email,
+        ...progress,
+        'checklist-state': JSON.stringify(updated),
+      });
+      await fetch(`${SCRIPT_URL}?${params.toString()}`);
+    } catch (_) {
+      // Silent fail
+    }
+  }, [email, progress, checklistState]);
 
   const isDayComplete = (dayNumber) => progress[`day-${dayNumber}`] === 'yes';
 
@@ -87,6 +126,7 @@ export function useProgress(email) {
 
   return {
     progress,
+    checklistState,
     loading,
     error,
     saving,
@@ -94,6 +134,7 @@ export function useProgress(email) {
     isDayUnlocked,
     completeDay,
     saveSentence,
+    setChecklistItem,
     allComplete,
   };
 }
