@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PromptBlock from './PromptBlock';
 import ResultBlock from './ResultBlock';
 import styles from './DayContent.module.css';
