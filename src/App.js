@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DAYS } from './data/days';
 import { useProgress } from './hooks/useProgress';
 import Header from './components/Header';
@@ -32,6 +32,16 @@ export default function App() {
   } = useProgress(email);
 
   const completedCount = [1, 2, 3, 4, 5].filter(isDayComplete).length;
+
+  // Once progress loads, jump to the first incomplete (but unlocked) day
+  useEffect(() => {
+    if (loading) return;
+    const firstIncomplete = [1, 2, 3, 4, 5].find(
+      (n) => isDayUnlocked(n) && !isDayComplete(n)
+    );
+    if (firstIncomplete) setActiveDay(firstIncomplete - 1);
+  }, [loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const day = DAYS[activeDay];
 
   const handleMarkDone = () => {
