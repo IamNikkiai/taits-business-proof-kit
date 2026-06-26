@@ -33,8 +33,20 @@ export function useProgress(email) {
     async function loadProgress() {
       try {
         const url = `${SCRIPT_URL}?action=get&email=${encodeURIComponent(email)}`;
+        console.log('[useProgress] fetching:', url);
         const res = await fetch(url);
-        const data = await res.json();
+        const text = await res.text();
+        console.log('[useProgress] raw response:', text);
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseErr) {
+          console.error('[useProgress] JSON parse failed:', parseErr);
+          throw new Error('Invalid response from server');
+        }
+
+        console.log('[useProgress] parsed data:', data);
 
         if (data.found) {
           setProgress({
@@ -50,13 +62,15 @@ export function useProgress(email) {
           if (data['checklist-state']) {
             try {
               const parsed = JSON.parse(data['checklist-state']);
+              console.log('[useProgress] checklist loaded:', parsed);
               setChecklistState({ ...DEFAULT_CHECKLIST, ...parsed });
-            } catch (_) {
-              // Malformed JSON — fall back to defaults
+            } catch (e) {
+              console.warn('[useProgress] checklist-state parse failed:', e);
             }
           }
         }
       } catch (err) {
+        console.error('[useProgress] load error:', err);
         setError('Could not load your progress. Your work will still save when you complete each day.');
       } finally {
         setLoading(false);
