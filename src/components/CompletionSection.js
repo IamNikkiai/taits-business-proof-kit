@@ -18,7 +18,7 @@ function CheckItem({ label, checked, onChange }) {
   );
 }
 
-export default function CompletionSection() {
+export default function CompletionSection({ onResetAll }) {
   const { copy, copiedKey } = useCopy();
   const [launchChecks, setLaunchChecks] = useState(Array(LAUNCH_CHECKLIST.length).fill(false));
 
@@ -75,6 +75,21 @@ export default function CompletionSection() {
             onChange={() => toggleLaunch(i)}
           />
         ))}
+      </div>
+
+      {/* Start Over */}
+      <div className={styles.resetSection}>
+        <p className={styles.resetLabel}>Want to go through the kit again with fresh eyes?</p>
+        <button
+          className={styles.resetBtn}
+          onClick={() => {
+            if (window.confirm('This will clear all your progress and answers so you can start fresh. Continue?')) {
+              onResetAll && onResetAll();
+            }
+          }}
+        >
+          Start Over
+        </button>
       </div>
     </div>
   );

@@ -19,23 +19,28 @@ export default function App() {
   const [sentence, setSentence] = useState('');
 
   const {
+    progress,
+    inputState,
     loading,
     error,
     saving,
-    checklistState,
-    setChecklistItem,
     isDayComplete,
     isDayUnlocked,
     completeDay,
     saveSentence,
+    setChecklistItem,
+    setDay3Answer,
+    resetDayInputs,
+    resetAll,
     allComplete,
   } = useProgress(email);
 
   const completedCount = [1, 2, 3, 4, 5].filter(isDayComplete).length;
 
-  // Once progress loads, jump to the first incomplete (but unlocked) day
+  // Once progress loads: sync sentence and jump to first incomplete unlocked day
   useEffect(() => {
     if (loading) return;
+    setSentence(progress.sentence || '');
     const firstIncomplete = [1, 2, 3, 4, 5].find(
       (n) => isDayUnlocked(n) && !isDayComplete(n)
     );
@@ -45,22 +50,19 @@ export default function App() {
   const day = DAYS[activeDay];
 
   const handleMarkDone = () => {
-    completeDay(day.number);
-    // Auto-advance to next day if not the last
+    if (day.number === 5) {
+      completeDay(5, sentence.trim());
+    } else {
+      completeDay(day.number);
+    }
     if (activeDay < DAYS.length - 1) {
       setTimeout(() => setActiveDay(activeDay + 1), 400);
     }
   };
 
-  const handleSentenceChange = (val) => {
-    setSentence(val);
-  };
+  const markDoneLabel = day.number === 5 ? 'Complete My Kit' : 'Mark Done';
 
-  const handleSentenceSave = () => {
-    if (sentence.trim()) saveSentence(sentence.trim());
-  };
-
-  // No email in URL — show a friendly message
+  // No email in URL — show a friendly gate
   if (!email) {
     return (
       <div className={styles.noEmail}>
@@ -85,11 +87,8 @@ export default function App() {
       />
 
       <div className={styles.content}>
-        {error && (
-          <div className={styles.errorBanner}>{error}</div>
-        )}
+        {error && <div className={styles.errorBanner}>{error}</div>}
 
-        {/* Active day card */}
         <div className={styles.dayCard}>
           <div className={styles.dayNum}>DAY {day.number} OF 5</div>
           <div className={styles.dayTitle}>{day.title}</div>
@@ -97,29 +96,29 @@ export default function App() {
           <DayContent
             day={day}
             sentence={sentence}
-            onSentenceChange={handleSentenceChange}
-            checklistItems={checklistState[`day-${day.number}`]}
-            onChecklistChange={(index, value) => setChecklistItem(`day-${day.number}`, index, value)}
+            onSentenceChange={setSentence}
+            onSentenceBlur={saveSentence}
+            checklistItems={inputState['day-1']}
+            onChecklistChange={(index, value) => setChecklistItem(index, value)}
+            day3Answers={inputState['day-3']}
+            onDay3AnswerChange={setDay3Answer}
           />
 
           {/* Mark done row */}
           <div className={styles.markRow}>
             <span className={isDayComplete(day.number) ? styles.completionMsg : styles.pendingMsg}>
-              {isDayComplete(day.number) ? day.completionCopy : 'Mark day complete when you\'re done.'}
+              {isDayComplete(day.number)
+                ? day.completionCopy
+                : "Mark day complete when you're done."}
             </span>
             <div className={styles.markActions}>
-              {day.number === 5 && !isDayComplete(5) && sentence.trim() && (
-                <button className={styles.saveBtn} onClick={handleSentenceSave}>
-                  Save Sentence
-                </button>
-              )}
               {!isDayComplete(day.number) && (
                 <button
                   className={styles.markBtn}
                   onClick={handleMarkDone}
                   disabled={saving}
                 >
-                  {saving ? 'Saving...' : 'Mark Done'}
+                  {saving ? 'Saving...' : markDoneLabel}
                 </button>
               )}
               {isDayComplete(day.number) && (
@@ -129,12 +128,21 @@ export default function App() {
               )}
             </div>
           </div>
+
+          {/* Clear & redo — only for days with saved inputs */}
+          {isDayComplete(day.number) && (day.number === 1 || day.number === 3) && (
+            <div className={styles.redoRow}>
+              <button
+                className={styles.redoBtn}
+                onClick={() => resetDayInputs(day.number)}
+              >
+                ↩ Clear & redo this day's work
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Post-completion blocks */}
-        {allComplete && <CompletionSection />}
-
-        {/* CTA always visible */}
+        {allComplete && <CompletionSection onResetAll={resetAll} />}
         <ClosingCTA />
       </div>
     </div>

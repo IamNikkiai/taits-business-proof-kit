@@ -167,3 +167,34 @@
   color: #aaa;
   text-decoration: line-through;
 }
+
+.resetSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 8px;
+}
+
+.resetLabel {
+  font-size: 13px;
+  color: #aaa;
+  text-align: center;
+}
+
+.resetBtn {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: #aaa;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.resetBtn:hover {
+  color: #555;
+  border-color: #999;
+}

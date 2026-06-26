@@ -27,15 +27,18 @@ function CheckItem({ label, checked, onChange }) {
   );
 }
 
-// Day 1 — checklist + prompt
+// Day 1 — checklist + prompt (checks come from Sheets via props)
 function Day1Content({ day, checklistItems, onChecklistChange }) {
   const checks = checklistItems || Array(day.checklist.length).fill(false);
+  const allChecked = checks.every(Boolean);
 
   return (
     <>
       <SectionLabel>TASK</SectionLabel>
       <p className={styles.body}>{day.task}</p>
-      <SectionLabel>CHECKLIST</SectionLabel>
+      <SectionLabel>
+        CHECKLIST{allChecked ? ' — all done ✓' : ` — ${checks.filter(Boolean).length} of ${checks.length}`}
+      </SectionLabel>
       <div className={styles.checkList}>
         {day.checklist.map((item, i) => (
           <CheckItem
@@ -66,22 +69,16 @@ function Day2Content({ day }) {
   );
 }
 
-// Day 3 — questions + dynamic prompt
-function Day3Content({ day }) {
-  const [answers, setAnswers] = useState(Array(5).fill(''));
-
-  const updateAnswer = (i, val) => {
-    const next = [...answers];
-    next[i] = val;
-    setAnswers(next);
-  };
+// Day 3 — questions + dynamic prompt (answers come from Sheets via props)
+function Day3Content({ day, answers, onAnswerChange }) {
+  const vals = answers || Array(5).fill('');
 
   const filledPrompt = day.promptTemplate
-    .replace('[Q1]', answers[0] || '[PASTE ANSWER TO QUESTION 1]')
-    .replace('[Q2]', answers[1] || '[PASTE ANSWER TO QUESTION 2]')
-    .replace('[Q3]', answers[2] || '[PASTE ANSWER TO QUESTION 3]')
-    .replace('[Q4]', answers[3] || '[PASTE ANSWER TO QUESTION 4]')
-    .replace('[Q5]', answers[4] || '[PASTE ANSWER TO QUESTION 5]');
+    .replace('[Q1]', vals[0] || '[PASTE ANSWER TO QUESTION 1]')
+    .replace('[Q2]', vals[1] || '[PASTE ANSWER TO QUESTION 2]')
+    .replace('[Q3]', vals[2] || '[PASTE ANSWER TO QUESTION 3]')
+    .replace('[Q4]', vals[3] || '[PASTE ANSWER TO QUESTION 4]')
+    .replace('[Q5]', vals[4] || '[PASTE ANSWER TO QUESTION 5]');
 
   return (
     <>
@@ -96,8 +93,8 @@ function Day3Content({ day }) {
               className={styles.qInput}
               rows={2}
               placeholder="Your answer..."
-              value={answers[i]}
-              onChange={(e) => updateAnswer(i, e.target.value)}
+              value={vals[i]}
+              onChange={(e) => onAnswerChange(i, e.target.value)}
             />
           </div>
         ))}
@@ -136,8 +133,8 @@ function Day4Content({ day }) {
   );
 }
 
-// Day 5 — formula + prompt + sentence input
-function Day5Content({ day, sentence, onSentenceChange }) {
+// Day 5 — formula + prompt + sentence input (sentence synced from Sheets via props)
+function Day5Content({ day, sentence, onSentenceChange, onSentenceBlur }) {
   return (
     <>
       <SectionLabel>TASK</SectionLabel>
@@ -154,9 +151,10 @@ function Day5Content({ day, sentence, onSentenceChange }) {
           placeholder="I help..."
           value={sentence}
           onChange={(e) => onSentenceChange(e.target.value)}
+          onBlur={(e) => onSentenceBlur && onSentenceBlur(e.target.value)}
         />
         <p className={styles.sentenceHint}>
-          Write the one that sounds most like you. This is your sentence — not AI's. Edit it until it sounds right.
+          Write the one that sounds most like you. This is your sentence — not AI's. Edit it until it sounds right. It saves automatically when you click away.
         </p>
       </div>
       <ResultBlock result={day.result} />
@@ -164,15 +162,43 @@ function Day5Content({ day, sentence, onSentenceChange }) {
   );
 }
 
-export default function DayContent({ day, sentence, onSentenceChange, checklistItems, onChecklistChange }) {
+export default function DayContent({
+  day,
+  sentence,
+  onSentenceChange,
+  onSentenceBlur,
+  checklistItems,
+  onChecklistChange,
+  day3Answers,
+  onDay3AnswerChange,
+}) {
   const n = day.number;
   return (
     <div className={styles.wrap}>
-      {n === 1 && <Day1Content day={day} checklistItems={checklistItems} onChecklistChange={onChecklistChange} />}
+      {n === 1 && (
+        <Day1Content
+          day={day}
+          checklistItems={checklistItems}
+          onChecklistChange={onChecklistChange}
+        />
+      )}
       {n === 2 && <Day2Content day={day} />}
-      {n === 3 && <Day3Content day={day} />}
+      {n === 3 && (
+        <Day3Content
+          day={day}
+          answers={day3Answers}
+          onAnswerChange={onDay3AnswerChange}
+        />
+      )}
       {n === 4 && <Day4Content day={day} />}
-      {n === 5 && <Day5Content day={day} sentence={sentence} onSentenceChange={onSentenceChange} />}
+      {n === 5 && (
+        <Day5Content
+          day={day}
+          sentence={sentence}
+          onSentenceChange={onSentenceChange}
+          onSentenceBlur={onSentenceBlur}
+        />
+      )}
     </div>
   );
 }

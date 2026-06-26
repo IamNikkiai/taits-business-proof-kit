@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const SCRIPT_URL = process.env.REACT_APP_SCRIPT_URL;
 
-// Default checklist state: day-1 has 5 items (the only day with a checklist)
-const DEFAULT_CHECKLIST = {
+const DEFAULT_INPUT = {
   'day-1': [false, false, false, false, false],
+  'day-3': ['', '', '', '', ''],
 };
 
 const DEFAULT_PROGRESS = {
@@ -18,112 +18,135 @@ const DEFAULT_PROGRESS = {
 
 export function useProgress(email) {
   const [progress, setProgress] = useState(DEFAULT_PROGRESS);
-  const [checklistState, setChecklistState] = useState(DEFAULT_CHECKLIST);
+  const [inputState, setInputState] = useState(DEFAULT_INPUT);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // Load progress on mount
-  useEffect(() => {
-    if (!email) {
-      setLoading(false);
-      return;
-    }
+  // Refs so save callbacks always see latest state without stale closures
+  const progressRef = useRef(DEFAULT_PROGRESS);
+  const inputRef = useRef(DEFAULT_INPUT);
+  const debounceRef = useRef(null);
 
-    async function loadProgress() {
+  useEffect(() => { progressRef.current = progress; }, [progress]);
+  useEffect(() => { inputRef.current = inputState; }, [inputState]);
+
+  // ── Load all progress on mount ──────────────────────────────────────────
+  useEffect(() => {
+    if (!email) { setLoading(false); return; }
+
+    async function load() {
       try {
         const url = `${SCRIPT_URL}?action=get&email=${encodeURIComponent(email)}`;
-        console.log('[useProgress] fetching:', url);
         const res = await fetch(url);
         const text = await res.text();
-        console.log('[useProgress] raw response:', text);
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (parseErr) {
-          console.error('[useProgress] JSON parse failed:', parseErr);
-          throw new Error('Invalid response from server');
-        }
-
-        console.log('[useProgress] parsed data:', data);
+        const data = JSON.parse(text);
 
         if (data.found) {
-          setProgress({
+          const loaded = {
             'day-1': data['day-1'] || 'no',
             'day-2': data['day-2'] || 'no',
             'day-3': data['day-3'] || 'no',
             'day-4': data['day-4'] || 'no',
             'day-5': data['day-5'] || 'no',
             sentence: data.sentence || '',
-          });
+          };
+          setProgress(loaded);
+          progressRef.current = loaded;
 
-          // Parse saved checklist state
           if (data['checklist-state']) {
             try {
               const parsed = JSON.parse(data['checklist-state']);
-              console.log('[useProgress] checklist loaded:', parsed);
-              setChecklistState({ ...DEFAULT_CHECKLIST, ...parsed });
-            } catch (e) {
-              console.warn('[useProgress] checklist-state parse failed:', e);
-            }
+              const merged = { ...DEFAULT_INPUT, ...parsed };
+              setInputState(merged);
+              inputRef.current = merged;
+            } catch (_) {}
           }
         }
-      } catch (err) {
-        console.error('[useProgress] load error:', err);
-        setError('Could not load your progress. Your work will still save when you complete each day.');
+      } catch (_) {
+        setError('Could not load your progress. Keep going — your work will save as you complete each day.');
       } finally {
         setLoading(false);
       }
     }
 
-    loadProgress();
+    load();
   }, [email]);
 
-  // Save a single progress field update (day completion, sentence)
-  const saveField = useCallback(async (field, value) => {
+  // ── Core persist — always sends full current state ──────────────────────
+  const persist = useCallback(async (pOverride, iOverride) => {
     if (!email || !SCRIPT_URL) return;
+    const p = pOverride ?? progressRef.current;
+    const inp = iOverride ?? inputRef.current;
+    try {
+      const params = new URLSearchParams({
+        action: 'save',
+        email,
+        ...p,
+        'checklist-state': JSON.stringify(inp),
+      });
+      await fetch(`${SCRIPT_URL}?${params.toString()}`);
+    } catch (_) {}
+  }, [email]);
 
+  // ── Mark a day complete (Day 5 can pass sentence to co-save) ───────────
+  const completeDay = useCallback((dayNumber, sentenceText) => {
     setSaving(true);
-    const updated = { ...progress, [field]: value };
+    const updated = { ...progressRef.current, [`day-${dayNumber}`]: 'yes' };
+    if (sentenceText !== undefined) updated.sentence = sentenceText;
     setProgress(updated);
+    progressRef.current = updated;
+    persist(updated, null).finally(() => setSaving(false));
+  }, [persist]);
 
-    try {
-      const params = new URLSearchParams({
-        action: 'save',
-        email,
-        ...updated,
-        'checklist-state': JSON.stringify(checklistState),
-      });
-      await fetch(`${SCRIPT_URL}?${params.toString()}`);
-    } catch (_) {
-      // Silent fail — state is still updated locally
-    } finally {
-      setSaving(false);
-    }
-  }, [email, progress, checklistState]);
+  // ── Save sentence (call on textarea blur) ───────────────────────────────
+  const saveSentence = useCallback((text) => {
+    const updated = { ...progressRef.current, sentence: text };
+    setProgress(updated);
+    progressRef.current = updated;
+    persist(updated, null);
+  }, [persist]);
 
-  // Toggle a single checklist item and persist immediately
-  const setChecklistItem = useCallback(async (dayKey, index, value) => {
-    if (!email || !SCRIPT_URL) return;
+  // ── Day 1: toggle checklist item (immediate save) ───────────────────────
+  const setChecklistItem = useCallback((index, value) => {
+    const items = [...(inputRef.current['day-1'] || [false, false, false, false, false])];
+    items[index] = value;
+    const updated = { ...inputRef.current, 'day-1': items };
+    setInputState(updated);
+    inputRef.current = updated;
+    persist(null, updated);
+  }, [persist]);
 
-    const dayItems = checklistState[dayKey] ? [...checklistState[dayKey]] : [];
-    dayItems[index] = value;
-    const updated = { ...checklistState, [dayKey]: dayItems };
-    setChecklistState(updated);
+  // ── Day 3: update answer (debounced 1.5s save) ──────────────────────────
+  const setDay3Answer = useCallback((index, value) => {
+    const answers = [...(inputRef.current['day-3'] || ['', '', '', '', ''])];
+    answers[index] = value;
+    const updated = { ...inputRef.current, 'day-3': answers };
+    setInputState(updated);
+    inputRef.current = updated;
 
-    try {
-      const params = new URLSearchParams({
-        action: 'save',
-        email,
-        ...progress,
-        'checklist-state': JSON.stringify(updated),
-      });
-      await fetch(`${SCRIPT_URL}?${params.toString()}`);
-    } catch (_) {
-      // Silent fail
-    }
-  }, [email, progress, checklistState]);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => persist(null, updated), 1500);
+  }, [persist]);
+
+  // ── Clear a day's typed content (keeps completion status) ───────────────
+  const resetDayInputs = useCallback((dayNumber) => {
+    const updated = { ...inputRef.current };
+    if (dayNumber === 1) updated['day-1'] = [false, false, false, false, false];
+    if (dayNumber === 3) updated['day-3'] = ['', '', '', '', ''];
+    setInputState(updated);
+    inputRef.current = updated;
+    persist(null, updated);
+  }, [persist]);
+
+  // ── Full reset — wipes all progress and inputs ──────────────────────────
+  const resetAll = useCallback(() => {
+    setProgress(DEFAULT_PROGRESS);
+    setInputState(DEFAULT_INPUT);
+    progressRef.current = DEFAULT_PROGRESS;
+    inputRef.current = DEFAULT_INPUT;
+    persist(DEFAULT_PROGRESS, DEFAULT_INPUT);
+  }, [persist]);
 
   const isDayComplete = (dayNumber) => progress[`day-${dayNumber}`] === 'yes';
 
@@ -132,15 +155,11 @@ export function useProgress(email) {
     return progress[`day-${dayNumber - 1}`] === 'yes';
   };
 
-  const completeDay = (dayNumber) => saveField(`day-${dayNumber}`, 'yes');
-
-  const saveSentence = (text) => saveField('sentence', text);
-
   const allComplete = [1, 2, 3, 4, 5].every(isDayComplete);
 
   return {
     progress,
-    checklistState,
+    inputState,
     loading,
     error,
     saving,
@@ -149,6 +168,9 @@ export function useProgress(email) {
     completeDay,
     saveSentence,
     setChecklistItem,
+    setDay3Answer,
+    resetDayInputs,
+    resetAll,
     allComplete,
   };
 }

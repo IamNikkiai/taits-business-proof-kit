@@ -132,6 +132,30 @@
   cursor: default;
 }
 
+/* Clear & redo */
+.redoRow {
+  padding-top: 2px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.redoBtn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color .15s;
+}
+
+.redoBtn:hover {
+  color: #555;
+}
+
 /* No email state */
 .noEmail {
   min-height: 100vh;
