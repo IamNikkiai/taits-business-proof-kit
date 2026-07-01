@@ -7,9 +7,9 @@ export default function Header({ completedCount, loading }) {
   return (
     <div className={styles.header}>
       <span className={styles.badge}>Built for Curious Carla</span>
-      <h1 className={styles.title}>The 5-Day Business Proof Kit™</h1>
+      <h1 className={styles.title}>The 5-Day Product Proof Kit™</h1>
       <p className={styles.sub}>
-        One task. One prompt. One result — every day for 5 days. By Day 5, you'll have proof you can build a business.
+        One task. One prompt. One result — every day for 5 days. By Day 5, you'll have a real product — named, priced, and yours.
       </p>
       {loading ? (
         <p className={styles.loading}>Loading your progress...</p>

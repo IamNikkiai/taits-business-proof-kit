@@ -1,4 +1,4 @@
-// TAITS Business Proof Kit — Google Apps Script backend
+// TAITS Product Proof Kit — Google Apps Script backend
 // Schema columns (in order):
 // email | first-seen | day-1 | day-2 | day-3 | day-4 | day-5 | last-active | sentence | checklist-state
 

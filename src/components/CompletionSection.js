@@ -33,7 +33,7 @@ export default function CompletionSection({ onResetAll }) {
       {/* Completion card */}
       <div className={styles.completionCard}>
         <div className={styles.completionLabel}>COMPLETE</div>
-        <div className={styles.completionTitle}>The 5-Day Business Proof Kit™ — Complete.</div>
+        <div className={styles.completionTitle}>The 5-Day Product Proof Kit™ — Complete.</div>
         <p className={styles.completionBody}>
           You came in without a sentence. You're leaving with one.
           <br /><br />

@@ -75,13 +75,13 @@ Who it helps: [PASTE DAY 3 ONE-SENTENCE DESCRIPTION]
 Using the information above:
 1. Write 3 possible names for a simple digital product based on this skill. Each name should follow this format: [who it's for] + [what they get] + [how long or how easy]. Keep each name under 10 words.
 2. Recommend one price point between $7 and $97 and give one sentence explaining why.`,
-    result: "A named offer. A price. One sentence describing it. You now have a product — it doesn't exist yet, but you know what it is.",
+    result: "A named offer. A price. One sentence describing it. You now have a real product — named, priced, and defined. It didn't exist four days ago. It does now.",
     completionCopy: "Most people spend months here. You just did it in 30 minutes.",
   },
   {
     number: 5,
-    title: 'Write Your One-Sentence Business Description',
-    task: 'Combine your Day 3 skill and your Day 4 offer into one sentence using the formula below. Run the AI prompt. Then write your final sentence in the space provided.',
+    title: 'Put Your Product Into One Sentence',
+    task: 'You built a product yesterday. Today you put it into words. Combine your Day 3 skill and your Day 4 offer into one sentence using the formula below. Run the AI prompt. Then write your final sentence in the space provided.',
     type: 'sentence',
     formula: `"I help [WHO] [DO WHAT] using [HOW]."
 
@@ -89,14 +89,14 @@ Examples:
 — "I help busy moms get dinner on the table in 30 minutes using simple meal prep systems."
 — "I help new managers have hard conversations using a 3-step script that actually works."
 — "I help women who are done collecting AI tools build their first digital product using a 5-day system."`,
-    prompt: `Using the information below, write 3 versions of a one-sentence business description in this format: "I help [WHO] [DO WHAT] using [HOW]."
+    prompt: `Using the information below, write 3 versions of a one-sentence product description in this format: "I help [WHO] [DO WHAT] using [HOW]."
 
 My skill: [PASTE DAY 3 SKILL NAME]
 Who I help: [PASTE DAY 3 DESCRIPTION OF WHO IT HELPS]
 My offer: [PASTE DAY 4 OFFER NAME]
 
 Make each sentence specific, simple, and direct. No jargon. No vague outcomes. The sentence should be something I could say out loud to a stranger at a coffee shop and have them immediately understand what I do.`,
-    result: '"I help [who] [do what] using [how]." — a sentence you can use immediately. On your social profile. In your email signature. As the first line of anything you write about your business.',
+    result: '"I help [who] [do what] using [how]." — a sentence you can use immediately. On your social profile. In your email signature. As the first line of anything you write about the product you built.',
     completionCopy: "That sentence took five days to earn. Most people never write it.",
     isFinalDay: true,
   },
@@ -110,7 +110,7 @@ export const LAUNCH_CHECKLIST = [
   'Decide: do you want to build this offer yourself, or do you want a complete system that walks you through every step? (The AI Business Blueprint™ is that system — see below)',
 ];
 
-export const SHARE_CAPTION = `I just finished the 5-Day Business Proof Kit™ and here's my sentence:
+export const SHARE_CAPTION = `I just finished the 5-Day Product Proof Kit™ and here's my sentence:
 
 "I help [YOUR SENTENCE HERE]."
 
@@ -118,4 +118,4 @@ Five days. One task per day. This is what I have to show for it.
 
 If you've been circling this question — what do I build, where do I start — this Kit is $17 and it's the most useful thing I've bought this year.
 
-theaitoolstack.com/5-day-business-proof-kit`;
+theaitoolstack.com/product-proof-kit`;
